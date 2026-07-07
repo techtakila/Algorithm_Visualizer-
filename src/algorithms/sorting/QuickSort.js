@@ -1,4 +1,4 @@
-import { BaseAlgorithm, AlgorithmUtils, RenderUtils } from '../core/algorithmEngine'
+import { BaseAlgorithm, AlgorithmUtils } from '../core/algorithmEngine'
 
 export class QuickSort extends BaseAlgorithm {
   constructor() {
@@ -6,7 +6,7 @@ export class QuickSort extends BaseAlgorithm {
       id: 'quick-sort',
       name: 'Quick Sort',
       category: 'sorting',
-      description: 'Quick Sort is a highly efficient divide-and-conquer algorithm that selects a pivot and partitions the array around it. While it has O(n²) worst-case complexity, its average-case O(n log n) performance and small space complexity make it one of the most popular sorting algorithms.',
+      description: 'Quick Sort is a divide-and-conquer algorithm that selects a pivot and partitions the array around it.',
       complexity: {
         time: 'O(n log n)',
         space: 'O(log n)',
@@ -14,33 +14,31 @@ export class QuickSort extends BaseAlgorithm {
         worst: 'O(n²)',
         average: 'O(n log n)'
       },
-      pseudocode: `procedure quickSort(A : list, low, high)
+      pseudocode: `procedure quickSort(A, low, high)
     if low < high then
         p := partition(A, low, high)
         quickSort(A, low, p - 1)
         quickSort(A, p + 1, high)
     end if
 end procedure`,
-      useCases: [
-        'General-purpose sorting in applications like C++ std::sort',
-        'In-place sorting with minimal extra memory',
-        'Average-case performance critical applications',
-        'Cache-friendly sorting for modern processors'
-      ],
-      visualizationType: 'array'
+      useCases: ['General sorting', 'In-place sorting', 'Average O(n log n)']
     })
   }
 
   initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size)
-    this.state = { array: array.slice(), sorted: false }
+    const array = AlgorithmUtils.generateRandomArray(size, 100)
+    this.reset()
     this.generateSteps(array)
-    return this.state
+    return {
+      array: array.slice(),
+      steps: this.steps.length,
+      comparisons: this.comparisons,
+      swaps: this.swaps
+    }
   }
 
   generateSteps(array) {
     const arr = array.slice()
-    this.reset()
     this.quickSort(arr, 0, arr.length - 1)
   }
 
@@ -65,7 +63,9 @@ end procedure`,
         AlgorithmUtils.addStep(this, {
           type: 'swap',
           indices: [i, j],
-          array: arr.slice()
+          array: arr.slice(),
+          comparisons: this.comparisons,
+          swaps: this.swaps
         })
       }
     }
@@ -75,7 +75,9 @@ end procedure`,
     AlgorithmUtils.addStep(this, {
       type: 'partition',
       indices: [i + 1],
-      array: arr.slice()
+      array: arr.slice(),
+      comparisons: this.comparisons,
+      swaps: this.swaps
     })
 
     return i + 1
@@ -84,29 +86,32 @@ end procedure`,
   render(ctx, state, currentStep, width, height) {
     if (!state || !state.array) return
 
-    const array = state.array
+    const step = this.steps[currentStep]
+    const array = step ? step.array : state.array
     const barWidth = width / array.length
     const maxValue = 100
     const chartHeight = height - 40
 
-    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
     array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * chartHeight
-      const x = index * barWidth
-      const y = height - barHeight - 10
+      const barHeight = (value / maxValue) * (chartHeight - 20)
+      const x = index * barWidth + 1
+      const y = height - barHeight - 20
 
-      let color = '#8b5cf6' // purple
-      if (this.steps[currentStep]?.indices?.includes(index)) {
-        color = this.steps[currentStep]?.type === 'partition' ? '#10b981' : '#ef4444'
+      let color = '#8b5cf6'
+      if (step && step.indices && step.indices.includes(index)) {
+        color = step.type === 'partition' ? '#10b981' : '#ef4444'
       }
 
-      RenderUtils.drawBar(ctx, x, y, barWidth - 2, barHeight, color)
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, barWidth - 2, barHeight)
     })
 
-    RenderUtils.drawText(ctx, `Comparisons: ${this.comparisons} | Swaps: ${this.swaps}`, 10, 15, {
-      fontSize: 12,
-      color: '#333'
-    })
+    ctx.fillStyle = '#333'
+    ctx.font = '12px Arial'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Comparisons: ${step?.comparisons || 0} | Swaps: ${step?.swaps || 0}`, 10, 20)
   }
 }

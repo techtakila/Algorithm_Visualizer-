@@ -3,20 +3,6 @@
  * Provides infrastructure for algorithm execution, visualization, and analytics
  */
 
-import useAlgorithmStore from '../store/algorithmStore'
-
-// Algorithm execution contexts
-export const AlgorithmContext = {
-  SORTING: 'sorting',
-  SEARCHING: 'searching',
-  GREEDY: 'greedy',
-  DYNAMIC_PROGRAMMING: 'dynamic_programming',
-  DIVIDE_CONQUER: 'divide_conquer',
-  BACKTRACKING: 'backtracking',
-  BRANCH_BOUND: 'branch_bound',
-  BRUTE_FORCE: 'brute_force'
-}
-
 // Base algorithm structure
 export class BaseAlgorithm {
   constructor(config) {
@@ -37,10 +23,6 @@ export class BaseAlgorithm {
 
   initialize(size) {
     throw new Error('initialize() must be implemented')
-  }
-
-  executeStep(stepIndex) {
-    throw new Error('executeStep() must be implemented')
   }
 
   render(ctx, state, currentStep, width, height) {
@@ -97,15 +79,15 @@ export const AlgorithmUtils = {
   },
 
   generateRandomArray: (size, max = 100) => {
-    return Array.from({ length: size }, () => Math.random() * max)
+    return Array.from({ length: size }, () => Math.floor(Math.random() * max) + 1)
   },
 
   generateSortedArray: (size, max = 100) => {
-    return Array.from({ length: size }, (_, i) => (i / size) * max)
+    return Array.from({ length: size }, (_, i) => Math.floor((i / size) * max) + 1)
   },
 
   generateReverseSortedArray: (size, max = 100) => {
-    return Array.from({ length: size }, (_, i) => max - (i / size) * max)
+    return Array.from({ length: size }, (_, i) => Math.floor(max - (i / size) * max))
   }
 }
 
@@ -154,34 +136,5 @@ export const RenderUtils = {
       ctx.lineTo(width, i)
       ctx.stroke()
     }
-  },
-
-  drawGraph: (ctx, nodes, edges, width, height, highlightedNodes = []) => {
-    // Draw edges
-    ctx.strokeStyle = '#666'
-    ctx.lineWidth = 2
-    edges.forEach(([from, to]) => {
-      const fromNode = nodes[from]
-      const toNode = nodes[to]
-      ctx.beginPath()
-      ctx.moveTo(fromNode.x, fromNode.y)
-      ctx.lineTo(toNode.x, toNode.y)
-      ctx.stroke()
-    })
-    
-    // Draw nodes
-    nodes.forEach((node, idx) => {
-      const isHighlighted = highlightedNodes.includes(idx)
-      ctx.fillStyle = isHighlighted ? '#ff6b6b' : '#3b82f6'
-      ctx.beginPath()
-      ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI)
-      ctx.fill()
-      
-      ctx.fillStyle = '#fff'
-      ctx.font = 'bold 14px Arial'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(node.label, node.x, node.y)
-    })
   }
 }

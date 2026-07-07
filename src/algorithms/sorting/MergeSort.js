@@ -6,7 +6,7 @@ export class MergeSort extends BaseAlgorithm {
       id: 'merge-sort',
       name: 'Merge Sort',
       category: 'sorting',
-      description: 'Merge Sort is a divide-and-conquer algorithm that divides the array into halves, recursively sorts them, and then merges the sorted halves back together. It guarantees O(n log n) time complexity and is stable, making it ideal for large datasets.',
+      description: 'Merge Sort is a divide-and-conquer algorithm that divides the array into halves, recursively sorts them, and then merges them back.',
       complexity: {
         time: 'O(n log n)',
         space: 'O(n)',
@@ -14,37 +14,37 @@ export class MergeSort extends BaseAlgorithm {
         worst: 'O(n log n)',
         average: 'O(n log n)'
       },
-      pseudocode: `procedure mergeSort(A : list, left, right)
+      pseudocode: `procedure mergeSort(A, left, right)
     if left < right then
-        mid := ⌊(left + right) / 2⌋
+        mid := (left + right) / 2
         mergeSort(A, left, mid)
         mergeSort(A, mid + 1, right)
         merge(A, left, mid, right)
     end if
 end procedure`,
       useCases: [
-        'Large datasets requiring guaranteed O(n log n) performance',
-        'External sorting with limited memory (disk-based sorting)',
-        'Linked list sorting where random access is unavailable',
-        'Stable sorting requirement (preserving order of equal elements)'
+        'Large datasets',
+        'Guaranteed O(n log n)',
+        'External sorting'
       ],
       visualizationType: 'array'
     })
   }
 
   initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size)
-    this.state = {
-      array: array.slice(),
-      sorted: false
-    }
+    const array = AlgorithmUtils.generateRandomArray(size, 100)
+    this.reset()
     this.generateSteps(array)
-    return this.state
+    return {
+      array: array.slice(),
+      steps: this.steps.length,
+      comparisons: this.comparisons,
+      swaps: this.swaps
+    }
   }
 
   generateSteps(array) {
     const arr = array.slice()
-    this.reset()
     this.mergeSort(arr, 0, arr.length - 1)
   }
 
@@ -72,8 +72,10 @@ end procedure`,
       AlgorithmUtils.recordSwap(this)
       AlgorithmUtils.addStep(this, {
         type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, i) => left + i),
-        array: arr.slice()
+        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
+        array: arr.slice(),
+        comparisons: this.comparisons,
+        swaps: this.swaps
       })
     }
 
@@ -81,8 +83,10 @@ end procedure`,
       arr[k++] = leftArr[i++]
       AlgorithmUtils.addStep(this, {
         type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, i) => left + i),
-        array: arr.slice()
+        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
+        array: arr.slice(),
+        comparisons: this.comparisons,
+        swaps: this.swaps
       })
     }
 
@@ -90,8 +94,10 @@ end procedure`,
       arr[k++] = rightArr[j++]
       AlgorithmUtils.addStep(this, {
         type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, i) => left + i),
-        array: arr.slice()
+        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
+        array: arr.slice(),
+        comparisons: this.comparisons,
+        swaps: this.swaps
       })
     }
   }
@@ -99,30 +105,33 @@ end procedure`,
   render(ctx, state, currentStep, width, height) {
     if (!state || !state.array) return
 
-    const array = state.array
+    const step = this.steps[currentStep]
+    const array = step ? step.array : state.array
     const barWidth = width / array.length
     const maxValue = 100
-    const padding = 20
+    const padding = 40
     const chartHeight = height - padding
 
-    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
     array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * (chartHeight - padding)
-      const x = index * barWidth
-      const y = height - barHeight - 10
+      const barHeight = (value / maxValue) * (chartHeight - 20)
+      const x = index * barWidth + 1
+      const y = height - barHeight - 20
 
-      let color = '#10b981' // green
-      if (this.steps[currentStep]?.indices?.includes(index)) {
-        color = '#f59e0b' // amber
+      let color = '#10b981'
+      if (step && step.indices && step.indices.includes(index)) {
+        color = '#f59e0b'
       }
 
-      RenderUtils.drawBar(ctx, x, y, barWidth - 2, barHeight, color)
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, barWidth - 2, barHeight)
     })
 
-    RenderUtils.drawText(ctx, `Comparisons: ${this.comparisons} | Swaps: ${this.swaps}`, 10, 15, {
-      fontSize: 12,
-      color: '#666'
-    })
+    ctx.fillStyle = '#333'
+    ctx.font = '12px Arial'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Comparisons: ${step?.comparisons || 0} | Swaps: ${step?.swaps || 0}`, 10, 20)
   }
 }

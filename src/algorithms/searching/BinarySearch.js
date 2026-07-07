@@ -1,4 +1,4 @@
-import { BaseAlgorithm, AlgorithmUtils, RenderUtils } from '../core/algorithmEngine'
+import { BaseAlgorithm, AlgorithmUtils } from '../core/algorithmEngine'
 
 export class BinarySearch extends BaseAlgorithm {
   constructor() {
@@ -6,19 +6,15 @@ export class BinarySearch extends BaseAlgorithm {
       id: 'binary-search',
       name: 'Binary Search',
       category: 'searching',
-      description: 'Binary Search efficiently finds a target in a sorted array by repeatedly dividing the search space in half. Requires the array to be sorted but provides logarithmic time complexity.',
+      description: 'Binary Search efficiently finds a target in a sorted array by dividing the search space in half.',
       complexity: {
         time: 'O(log n)',
-        space: 'O(1)',
-        best: 'O(1)',
-        worst: 'O(log n)',
-        average: 'O(log n)'
+        space: 'O(1)'
       },
-      pseudocode: `procedure binarySearch(A : sorted list, target)
-    left := 0
-    right := length(A) - 1
+      pseudocode: `procedure binarySearch(A, target)
+    left := 0, right := length(A) - 1
     while left <= right do
-        mid := ⌊(left + right) / 2⌋
+        mid := (left + right) / 2
         if A[mid] == target then
             return mid
         else if A[mid] < target then
@@ -27,33 +23,25 @@ export class BinarySearch extends BaseAlgorithm {
             right := mid - 1
         end if
     end while
-    return -1
 end procedure`,
-      useCases: [
-        'Searching sorted arrays and lists',
-        'Database indexing and lookups',
-        'Finding insertion positions',
-        'Large-scale data retrieval systems'
-      ],
-      visualizationType: 'array'
+      useCases: ['Sorted arrays', 'Database lookups']
     })
   }
 
   initialize(size) {
-    const array = AlgorithmUtils.generateSortedArray(size)
+    const array = AlgorithmUtils.generateSortedArray(size, 100)
     const target = array[Math.floor(Math.random() * size)]
-    this.state = {
+    this.reset()
+    this.generateSteps(array, target)
+    return {
       array: array.slice(),
       target,
-      found: false,
-      foundIndex: -1
+      steps: this.steps.length,
+      comparisons: this.comparisons
     }
-    this.generateSteps(array, target)
-    return this.state
   }
 
   generateSteps(array, target) {
-    this.reset()
     let left = 0, right = array.length - 1
 
     while (left <= right) {
@@ -65,54 +53,47 @@ end procedure`,
         mid,
         right,
         found: array[mid] === target,
-        array: array.slice()
+        array: array.slice(),
+        comparisons: this.comparisons
       })
 
-      if (array[mid] === target) {
-        this.state.found = true
-        this.state.foundIndex = mid
-        break
-      } else if (array[mid] < target) {
-        left = mid + 1
-      } else {
-        right = mid - 1
-      }
+      if (array[mid] === target) break
+      else if (array[mid] < target) left = mid + 1
+      else right = mid - 1
     }
   }
 
   render(ctx, state, currentStep, width, height) {
     if (!state || !state.array) return
 
-    const array = state.array
     const step = this.steps[currentStep]
+    const array = state.array
     const barWidth = width / array.length
     const maxValue = array[array.length - 1] || 100
     const chartHeight = height - 40
 
-    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
     array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * chartHeight
-      const x = index * barWidth
-      const y = height - barHeight - 10
+      const barHeight = (value / maxValue) * (chartHeight - 20)
+      const x = index * barWidth + 1
+      const y = height - barHeight - 20
 
       let color = '#3b82f6'
       if (step) {
-        if (index === step.mid) {
-          color = '#f59e0b'
-        } else if (index < step.left || index > step.right) {
-          color = '#d1d5db'
-        } else if (step.found) {
-          color = '#10b981'
-        }
+        if (index === step.mid) color = '#f59e0b'
+        else if (index < step.left || index > step.right) color = '#d1d5db'
+        else if (step.found) color = '#10b981'
       }
 
-      RenderUtils.drawBar(ctx, x, y, barWidth - 2, barHeight, color)
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, barWidth - 2, barHeight)
     })
 
-    RenderUtils.drawText(ctx, `Target: ${state.target.toFixed(2)} | Found: ${state.found} | Operations: ${this.operations}`, 10, 15, {
-      fontSize: 12,
-      color: '#333'
-    })
+    ctx.fillStyle = '#333'
+    ctx.font = '12px Arial'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Target: ${state.target.toFixed(0)} | Operations: ${step?.comparisons || 0}`, 10, 20)
   }
 }

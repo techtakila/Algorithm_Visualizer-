@@ -1,4 +1,4 @@
-import { BaseAlgorithm, AlgorithmUtils, RenderUtils } from '../core/algorithmEngine'
+import { BaseAlgorithm, AlgorithmUtils } from '../core/algorithmEngine'
 
 export class LinearSearch extends BaseAlgorithm {
   constructor() {
@@ -6,15 +6,12 @@ export class LinearSearch extends BaseAlgorithm {
       id: 'linear-search',
       name: 'Linear Search',
       category: 'searching',
-      description: 'Linear Search sequentially checks each element of a list until a match is found or the end is reached. Simple but effective for unsorted data and small lists.',
+      description: 'Linear Search sequentially checks each element until a match is found.',
       complexity: {
         time: 'O(n)',
-        space: 'O(1)',
-        best: 'O(1)',
-        worst: 'O(n)',
-        average: 'O(n)'
+        space: 'O(1)'
       },
-      pseudocode: `procedure linearSearch(A : list, target)
+      pseudocode: `procedure linearSearch(A, target)
     for i := 0 to length(A) - 1 do
         if A[i] == target then
             return i
@@ -22,73 +19,66 @@ export class LinearSearch extends BaseAlgorithm {
     end for
     return -1
 end procedure`,
-      useCases: [
-        'Searching unsorted lists',
-        'Small datasets where simplicity matters',
-        'Linked lists (no random access available)',
-        'Online search where data arrives sequentially'
-      ],
-      visualizationType: 'array'
+      useCases: ['Unsorted lists', 'Small datasets']
     })
   }
 
   initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size)
+    const array = AlgorithmUtils.generateRandomArray(size, 100)
     const target = array[Math.floor(Math.random() * size)]
-    this.state = {
+    this.reset()
+    this.generateSteps(array, target)
+    return {
       array: array.slice(),
       target,
-      found: false,
-      foundIndex: -1
+      steps: this.steps.length,
+      comparisons: this.comparisons
     }
-    this.generateSteps(array, target)
-    return this.state
   }
 
   generateSteps(array, target) {
-    this.reset()
     for (let i = 0; i < array.length; i++) {
       AlgorithmUtils.recordOperation(this)
       AlgorithmUtils.addStep(this, {
         type: 'check',
         indices: [i],
         found: array[i] === target,
-        array: array.slice()
+        array: array.slice(),
+        comparisons: this.comparisons
       })
-      if (array[i] === target) {
-        this.state.found = true
-        this.state.foundIndex = i
-        break
-      }
+      if (array[i] === target) break
     }
   }
 
   render(ctx, state, currentStep, width, height) {
     if (!state || !state.array) return
 
+    const step = this.steps[currentStep]
     const array = state.array
     const barWidth = width / array.length
     const maxValue = 100
     const chartHeight = height - 40
 
-    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
     array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * chartHeight
-      const x = index * barWidth
-      const y = height - barHeight - 10
+      const barHeight = (value / maxValue) * (chartHeight - 20)
+      const x = index * barWidth + 1
+      const y = height - barHeight - 20
 
       let color = '#3b82f6'
-      if (this.steps[currentStep]?.indices?.includes(index)) {
-        color = this.steps[currentStep]?.found ? '#10b981' : '#f59e0b'
+      if (step && step.indices && step.indices.includes(index)) {
+        color = step.found ? '#10b981' : '#f59e0b'
       }
 
-      RenderUtils.drawBar(ctx, x, y, barWidth - 2, barHeight, color)
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, barWidth - 2, barHeight)
     })
 
-    RenderUtils.drawText(ctx, `Target: ${state.target.toFixed(2)} | Found: ${state.found ? 'Yes' : 'No'} | Operations: ${this.operations}`, 10, 15, {
-      fontSize: 12,
-      color: '#333'
-    })
+    ctx.fillStyle = '#333'
+    ctx.font = '12px Arial'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Target: ${state.target.toFixed(0)} | Operations: ${step?.comparisons || 0}`, 10, 20)
   }
 }

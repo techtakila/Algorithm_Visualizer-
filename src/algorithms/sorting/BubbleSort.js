@@ -6,7 +6,7 @@ export class BubbleSort extends BaseAlgorithm {
       id: 'bubble-sort',
       name: 'Bubble Sort',
       category: 'sorting',
-      description: 'Bubble Sort is a simple comparison-based sorting algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order. Despite its simplicity, it is rarely used in practice due to poor performance on large lists.',
+      description: 'Bubble Sort is a simple comparison-based sorting algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order.',
       complexity: {
         time: 'O(n²)',
         space: 'O(1)',
@@ -14,43 +14,40 @@ export class BubbleSort extends BaseAlgorithm {
         worst: 'O(n²)',
         average: 'O(n²)'
       },
-      pseudocode: `procedure bubbleSort(A : list of sortable items)
+      pseudocode: `procedure bubbleSort(A : list)
     n := length(A)
-    repeat
-        swapped := false
-        for i := 1 to n-1 do
-            if A[i-1] > A[i] then
-                swap(A[i-1], A[i])
-                swapped := true
+    for i := 0 to n-1 do
+        for j := 0 to n-i-2 do
+            if A[j] > A[j+1] then
+                swap(A[j], A[j+1])
             end if
         end for
-        n := n - 1
-    until not swapped
+    end for
 end procedure`,
       useCases: [
-        'Educational purposes - demonstrates sorting concepts clearly',
-        'Nearly sorted data where performance is acceptable',
-        'Small datasets with memory constraints',
-        'Testing sorting algorithm implementations'
+        'Educational purposes',
+        'Small datasets',
+        'Nearly sorted data'
       ],
       visualizationType: 'array'
     })
   }
 
   initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size)
-    this.state = {
-      array: array.slice(),
-      sorted: false
-    }
+    const array = AlgorithmUtils.generateRandomArray(size, 100)
+    this.reset()
     this.generateSteps(array)
-    return this.state
+    return {
+      array: array.slice(),
+      steps: this.steps.length,
+      comparisons: this.comparisons,
+      swaps: this.swaps
+    }
   }
 
   generateSteps(array) {
     const arr = array.slice()
     const n = arr.length
-    this.reset()
 
     for (let i = 0; i < n - 1; i++) {
       for (let j = 0; j < n - i - 1; j++) {
@@ -58,7 +55,9 @@ end procedure`,
         AlgorithmUtils.addStep(this, {
           type: 'compare',
           indices: [j, j + 1],
-          array: arr.slice()
+          array: arr.slice(),
+          comparisons: this.comparisons,
+          swaps: this.swaps
         })
 
         if (arr[j] > arr[j + 1]) {
@@ -67,49 +66,48 @@ end procedure`,
           AlgorithmUtils.addStep(this, {
             type: 'swap',
             indices: [j, j + 1],
-            array: arr.slice()
+            array: arr.slice(),
+            comparisons: this.comparisons,
+            swaps: this.swaps
           })
         }
       }
     }
   }
 
-  executeStep(stepIndex) {
-    const step = this.steps[stepIndex]
-    if (!step) return null
-    return { ...step, currentIndex: stepIndex }
-  }
-
   render(ctx, state, currentStep, width, height) {
     if (!state || !state.array) return
     
-    const array = state.array
+    const step = this.steps[currentStep]
+    const array = step ? step.array : state.array
     const barWidth = width / array.length
     const maxValue = 100
-    const padding = 20
+    const padding = 40
     const chartHeight = height - padding
 
     // Clear canvas
-    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
     // Draw bars
     array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * (chartHeight - padding)
-      const x = index * barWidth
-      const y = height - barHeight - 10
+      const barHeight = (value / maxValue) * (chartHeight - 20)
+      const x = index * barWidth + 1
+      const y = height - barHeight - 20
 
-      let color = '#3b82f6' // blue
-      if (this.steps[currentStep]?.indices?.includes(index)) {
-        color = this.steps[currentStep]?.type === 'swap' ? '#ef4444' : '#f59e0b' // red or amber
+      let color = '#3b82f6'
+      if (step && step.indices && step.indices.includes(index)) {
+        color = step.type === 'swap' ? '#ef4444' : '#f59e0b'
       }
 
-      RenderUtils.drawBar(ctx, x, y, barWidth - 2, barHeight, color)
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, barWidth - 2, barHeight)
     })
 
     // Draw stats
-    RenderUtils.drawText(ctx, `Comparisons: ${this.comparisons} | Swaps: ${this.swaps}`, 10, 15, {
-      fontSize: 12,
-      color: '#666'
-    })
+    ctx.fillStyle = '#333'
+    ctx.font = '12px Arial'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Comparisons: ${step?.comparisons || 0} | Swaps: ${step?.swaps || 0}`, 10, 20)
   }
 }
