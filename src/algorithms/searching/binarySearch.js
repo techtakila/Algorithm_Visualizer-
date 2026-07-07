@@ -1,89 +1,60 @@
-// Binary Search Implementation
+import { drawArrayBars, drawTitle } from '../visualHelpers'
+
 export const BinarySearch = {
   name: 'Binary Search',
-  description: 'Binary Search is an efficient algorithm for finding a target value in a sorted array. It works by repeatedly dividing the search interval in half. If the target value matches the middle element, the position is returned. If not, the half where the target cannot lie is eliminated.',
+  description: 'Binary Search finds a target in sorted data by repeatedly checking the middle value and discarding the half that cannot contain the answer.',
   complexity: {
     time: 'O(log n)',
-    space: 'O(1)'
+    space: 'O(1)',
   },
-  pseudocode: `procedure binarySearch(A : sorted list, target)
+  pseudocode: `procedure binarySearch(A, target)
     left := 0
     right := length(A) - 1
     while left <= right do
         mid := (left + right) / 2
-        if A[mid] == target then
-            return mid
-        else if A[mid] < target then
-            left := mid + 1
-        else
-            right := mid - 1
-        end if
+        if A[mid] == target then return mid
+        if A[mid] < target then left := mid + 1
+        else right := mid - 1
     end while
     return -1
 end procedure`,
   useCases: [
-    'Searching in sorted lists',
-    'Large datasets',
-    'Database indexing',
-    'Finding insertion positions'
+    'Sorted arrays',
+    'Database indexes',
+    'Large ordered datasets',
+    'Finding insertion positions',
   ],
   initialize: (size) => {
-    const array = Array.from({ length: size }, (_, i) => i * 2 + Math.random() * 0.5)
-    const target = array[Math.floor(Math.random() * size)]
-    return {
-      array: array.slice(),
-      target,
-      steps: generateBinarySearchSteps(array, target),
-      currentArray: array.slice()
-    }
+    const n = Math.min(size, 70)
+    const array = Array.from({ length: n }, (_, i) => i * 2 + 3)
+    const target = array[Math.floor(n * 0.62)]
+    return { array: array.slice(), target, steps: buildSteps(array, target), currentArray: array.slice() }
   },
   render: (ctx, state, currentStep, width, height) => {
     if (!state) return
-    drawArray(ctx, state.currentArray, width, height, state.target, state.steps[currentStep])
-  }
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Halve the Candidate Range', step?.found ? `Found ${state.target} at index ${step.mid}` : `Search target: ${state.target}`)
+    drawArrayBars(ctx, state.currentArray, width, height, {
+      active: step ? [step.mid] : [],
+      success: step?.found ? [step.mid] : [],
+      muted: step ? state.currentArray.map((_, i) => i).filter((i) => i < step.left || i > step.right) : [],
+      top: 92,
+    })
+  },
 }
 
-function generateBinarySearchSteps(array, target) {
+function buildSteps(array, target) {
   const steps = []
-  let left = 0, right = array.length - 1
-  
+  let left = 0
+  let right = array.length - 1
+
   while (left <= right) {
     const mid = Math.floor((left + right) / 2)
-    steps.push({ type: 'check', left, mid, right })
-    
-    if (array[mid] === target) {
-      steps.push({ type: 'found', index: mid })
-      break
-    } else if (array[mid] < target) {
-      left = mid + 1
-    } else {
-      right = mid - 1
-    }
+    const found = array[mid] === target
+    steps.push({ left, right, mid, found })
+    if (found) break
+    if (array[mid] < target) left = mid + 1
+    else right = mid - 1
   }
   return steps
-}
-
-function drawArray(ctx, arr, width, height, target, currentStep) {
-  const barWidth = width / arr.length
-  const maxValue = arr[arr.length - 1] || 100
-  
-  arr.forEach((value, index) => {
-    const barHeight = (value / maxValue) * (height - 40)
-    const x = index * barWidth
-    const y = height - barHeight - 20
-    
-    let color = '#3b82f6'
-    if (currentStep) {
-      if (index === currentStep.mid) {
-        color = '#f59e0b'
-      } else if (currentStep.type === 'found' && index === currentStep.index) {
-        color = '#10b981'
-      } else if (index < currentStep.left || index > currentStep.right) {
-        color = '#d1d5db'
-      }
-    }
-    
-    ctx.fillStyle = color
-    ctx.fillRect(x, y, barWidth - 2, barHeight)
-  })
 }

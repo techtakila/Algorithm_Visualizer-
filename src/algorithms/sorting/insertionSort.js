@@ -1,12 +1,13 @@
-// Insertion Sort Implementation
+import { drawArrayBars, drawTitle } from '../visualHelpers'
+
 export const InsertionSort = {
   name: 'Insertion Sort',
-  description: 'Insertion Sort builds the sorted array one item at a time. It iterates through an input array and removes one element per iteration, finds the element\'s place in the sorted part, and inserts it. It is simple and efficient for small datasets and nearly sorted data.',
+  description: 'Insertion Sort grows a sorted prefix by taking one value at a time and shifting larger values to make room for it.',
   complexity: {
-    time: 'O(n²)',
-    space: 'O(1)'
+    time: 'O(n^2)',
+    space: 'O(1)',
   },
-  pseudocode: `procedure insertionSort(A : list of sortable items)
+  pseudocode: `procedure insertionSort(A)
     for i := 1 to length(A) - 1 do
         key := A[i]
         j := i - 1
@@ -20,60 +21,42 @@ end procedure`,
   useCases: [
     'Small datasets',
     'Nearly sorted data',
-    'Online sorting (sorting as data arrives)',
-    'Memory-efficient sorting'
+    'Online sorting',
+    'Memory-efficient sorting',
   ],
   initialize: (size) => {
-    const array = Array.from({ length: size }, () => Math.random() * 100)
-    return {
-      array: array.slice(),
-      steps: generateInsertionSortSteps(array),
-      currentArray: array.slice()
-    }
+    const n = Math.min(size, 70)
+    const array = Array.from({ length: n }, () => Math.floor(Math.random() * 92) + 8)
+    const steps = generateInsertionSortSteps(array)
+    return { array: array.slice(), steps, currentArray: array.slice() }
   },
   render: (ctx, state, currentStep, width, height) => {
     if (!state) return
-    const { steps, currentArray } = state
-    drawArray(ctx, currentArray, width, height, steps[currentStep])
-  }
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Grow a Sorted Prefix', step?.note || 'Insert each item into the sorted left side.')
+    drawArrayBars(ctx, step?.array || state.currentArray, width, height, {
+      active: step ? [step.index, step.from, step.to].filter((value) => value !== undefined) : [],
+      success: step ? Array.from({ length: step.sortedUntil + 1 }, (_, i) => i) : [],
+      top: 92,
+    })
+  },
 }
 
 function generateInsertionSortSteps(array) {
   const steps = []
   const arr = array.slice()
-  
-  for (let i = 1; i < arr.length; i++) {
+
+  for (let i = 1; i < arr.length; i += 1) {
     const key = arr[i]
     let j = i - 1
-    
+    steps.push({ array: arr.slice(), index: i, sortedUntil: i - 1, note: `Pick ${key} from index ${i}` })
     while (j >= 0 && arr[j] > key) {
       arr[j + 1] = arr[j]
-      steps.push({ type: 'move', from: j, to: j + 1 })
-      j--
+      steps.push({ array: arr.slice(), from: j, to: j + 1, sortedUntil: i, note: `Shift ${arr[j]} right` })
+      j -= 1
     }
     arr[j + 1] = key
-    steps.push({ type: 'insert', index: j + 1 })
+    steps.push({ array: arr.slice(), index: j + 1, sortedUntil: i, note: `Insert ${key} at index ${j + 1}` })
   }
   return steps
-}
-
-function drawArray(ctx, arr, width, height, currentStep) {
-  const barWidth = width / arr.length
-  const maxValue = 100
-  
-  arr.forEach((value, index) => {
-    const barHeight = (value / maxValue) * (height - 40)
-    const x = index * barWidth
-    const y = height - barHeight - 20
-    
-    let color = '#3b82f6'
-    if (currentStep) {
-      if (currentStep.type === 'insert' && index === currentStep.index) {
-        color = '#10b981'
-      }
-    }
-    
-    ctx.fillStyle = color
-    ctx.fillRect(x, y, barWidth - 2, barHeight)
-  })
 }

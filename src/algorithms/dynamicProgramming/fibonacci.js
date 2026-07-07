@@ -1,3 +1,5 @@
+import { drawTitle, getThemeColors } from '../visualHelpers'
+
 // Fibonacci DP Implementation
 export const FibonacciDP = {
   name: 'Fibonacci - Dynamic Programming',
@@ -37,25 +39,28 @@ end procedure`,
   },
   render: (ctx, state, currentStep, width, height) => {
     if (!state) return
+    drawTitle(ctx, 'Bottom-Up Fibonacci', `F(${Math.min(currentStep, state.fib.length - 1)}) is now available`)
     drawFibonacci(ctx, state.currentArray, width, height, currentStep)
   }
 }
 
 function drawFibonacci(ctx, fib, width, height, currentStep) {
+  const colors = getThemeColors()
   const barWidth = width / fib.length
   const maxValue = Math.max(...fib)
+  const top = 82
   
   fib.forEach((value, index) => {
-    const barHeight = (value / maxValue) * (height - 40)
+    const barHeight = (value / maxValue) * (height - top - 36)
     const x = index * barWidth
-    const y = height - barHeight - 20
+    const y = height - barHeight - 28
     
-    const color = index <= currentStep ? '#10b981' : '#3b82f6'
+    const color = index <= currentStep ? colors.green : colors.blue
     
     ctx.fillStyle = color
     ctx.fillRect(x, y, barWidth - 2, barHeight)
     
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = colors.text
     ctx.font = '10px Arial'
     ctx.textAlign = 'center'
     ctx.fillText(value, x + barWidth / 2, height - 5)

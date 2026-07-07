@@ -1,12 +1,13 @@
-// Linear Search Implementation
+import { drawArrayBars, drawTitle } from '../visualHelpers'
+
 export const LinearSearch = {
   name: 'Linear Search',
-  description: 'Linear Search is the simplest search algorithm. It checks every element in the list one by one until the target element is found or the end of the list is reached. It works on both sorted and unsorted lists.',
+  description: 'Linear Search checks each value one by one until it finds the target or reaches the end of the list. It works without sorted data.',
   complexity: {
     time: 'O(n)',
-    space: 'O(1)'
+    space: 'O(1)',
   },
-  pseudocode: `procedure linearSearch(A : list, target)
+  pseudocode: `procedure linearSearch(A, target)
     for i := 0 to length(A) - 1 do
         if A[i] == target then
             return i
@@ -15,51 +16,36 @@ export const LinearSearch = {
     return -1
 end procedure`,
   useCases: [
-    'Searching in unsorted lists',
+    'Unsorted lists',
     'Small datasets',
-    'Linked lists (no random access)',
-    'When simplicity is more important than speed'
+    'Linked lists',
+    'Simple membership checks',
   ],
   initialize: (size) => {
-    const array = Array.from({ length: size }, () => Math.random() * 100)
-    const target = array[Math.floor(Math.random() * size)]
-    return {
-      array: array.slice(),
-      target,
-      steps: generateLinearSearchSteps(array, target),
-      currentArray: array.slice()
-    }
+    const n = Math.min(size, 70)
+    const array = Array.from({ length: n }, () => Math.floor(Math.random() * 92) + 8)
+    const targetIndex = Math.floor(n * 0.72)
+    const target = array[targetIndex]
+    return { array: array.slice(), target, steps: buildSteps(array, target), currentArray: array.slice() }
   },
   render: (ctx, state, currentStep, width, height) => {
     if (!state) return
-    drawArray(ctx, state.currentArray, width, height, state.target, state.steps[currentStep])
-  }
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Sequential Scan', step?.found ? `Found ${state.target} at index ${step.index}` : `Search target: ${state.target}`)
+    drawArrayBars(ctx, state.currentArray, width, height, {
+      active: step ? [step.index] : [],
+      success: step?.found ? [step.index] : [],
+      muted: step ? state.currentArray.map((_, i) => i).filter((i) => i < step.index) : [],
+      top: 92,
+    })
+  },
 }
 
-function generateLinearSearchSteps(array, target) {
+function buildSteps(array, target) {
   const steps = []
-  for (let i = 0; i < array.length; i++) {
-    steps.push({ type: 'check', index: i, found: array[i] === target })
+  for (let i = 0; i < array.length; i += 1) {
+    steps.push({ index: i, found: array[i] === target })
     if (array[i] === target) break
   }
   return steps
-}
-
-function drawArray(ctx, arr, width, height, target, currentStep) {
-  const barWidth = width / arr.length
-  const maxValue = 100
-  
-  arr.forEach((value, index) => {
-    const barHeight = (value / maxValue) * (height - 40)
-    const x = index * barWidth
-    const y = height - barHeight - 20
-    
-    let color = '#3b82f6'
-    if (currentStep && currentStep.index === index) {
-      color = currentStep.found ? '#10b981' : '#f59e0b'
-    }
-    
-    ctx.fillStyle = color
-    ctx.fillRect(x, y, barWidth - 2, barHeight)
-  })
 }

@@ -1,4 +1,3 @@
-// Import all algorithms
 import { BubbleSort } from './sorting/bubbleSort'
 import { MergeSort } from './sorting/mergeSort'
 import { QuickSort } from './sorting/quickSort'
@@ -17,68 +16,70 @@ import { Sudoku } from './backtracking/sudoku'
 import { MazeSolver } from './backtracking/mazeSolver'
 import { TSPBranchBound } from './branchBound/tsp'
 import { KnapsackBB } from './branchBound/knapsack'
+import { BruteForceStringMatch } from './bruteForce/stringMatch'
+import { BruteForceKnapsack } from './bruteForce/knapsack'
 
 export const ALGORITHM_CATEGORIES = {
-  'sorting': {
-    name: '📊 Sorting Algorithms',
+  sorting: {
+    name: 'Sorting Algorithms',
     algorithms: [
       { id: 'bubble-sort', name: 'Bubble Sort' },
       { id: 'insertion-sort', name: 'Insertion Sort' },
       { id: 'merge-sort', name: 'Merge Sort' },
       { id: 'quick-sort', name: 'Quick Sort' },
-    ]
+    ],
   },
-  'searching': {
-    name: '🔍 Searching Algorithms',
+  searching: {
+    name: 'Searching Algorithms',
     algorithms: [
       { id: 'linear-search', name: 'Linear Search' },
       { id: 'binary-search', name: 'Binary Search' },
-    ]
+    ],
   },
-  'greedy': {
-    name: '🎯 Greedy Algorithms',
+  greedy: {
+    name: 'Greedy Algorithms',
     algorithms: [
       { id: 'activity-selection', name: 'Activity Selection' },
       { id: 'huffman-coding', name: 'Huffman Coding' },
-    ]
+    ],
   },
   'dynamic-programming': {
-    name: '📈 Dynamic Programming',
+    name: 'Dynamic Programming',
     algorithms: [
       { id: 'fibonacci-dp', name: 'Fibonacci (DP)' },
       { id: 'knapsack-dp', name: '0/1 Knapsack (DP)' },
       { id: 'lcs', name: 'Longest Common Subsequence' },
-    ]
+    ],
   },
   'divide-conquer': {
-    name: '✂️ Divide & Conquer',
+    name: 'Divide and Conquer',
     algorithms: [
       { id: 'merge-sort-dc', name: 'Merge Sort' },
       { id: 'binary-search-dc', name: 'Binary Search' },
-    ]
+    ],
   },
-  'backtracking': {
-    name: '🔄 Backtracking',
+  backtracking: {
+    name: 'Backtracking',
     algorithms: [
       { id: 'nqueens', name: 'N-Queens Problem' },
       { id: 'sudoku', name: 'Sudoku Solver' },
       { id: 'maze-solver', name: 'Maze Solver' },
-    ]
+    ],
   },
   'branch-bound': {
-    name: '🌳 Branch & Bound',
+    name: 'Branch and Bound',
     algorithms: [
       { id: 'tsp-bb', name: 'Traveling Salesman Problem' },
       { id: 'knapsack-bb', name: '0/1 Knapsack (B&B)' },
-    ]
+    ],
   },
   'brute-force': {
-    name: '💪 Brute Force',
+    name: 'Brute Force',
     algorithms: [
-      { id: 'linear-search', name: 'Linear Search' },
-      { id: 'bubble-sort', name: 'Bubble Sort' },
-    ]
-  }
+      { id: 'brute-force-string-match', name: 'String Matching' },
+      { id: 'brute-force-knapsack', name: 'Knapsack Subsets' },
+    ],
+  },
 }
 
 const algorithmMap = {
@@ -90,16 +91,18 @@ const algorithmMap = {
   'binary-search': BinarySearch,
   'fibonacci-dp': FibonacciDP,
   'knapsack-dp': KnapsackDP,
-  'lcs': LCS,
+  lcs: LCS,
   'activity-selection': ActivitySelection,
   'huffman-coding': HuffmanCoding,
   'merge-sort-dc': MergeSortDC,
   'binary-search-dc': BinarySearchDC,
-  'nqueens': NQueens,
-  'sudoku': Sudoku,
+  nqueens: NQueens,
+  sudoku: Sudoku,
   'maze-solver': MazeSolver,
   'tsp-bb': TSPBranchBound,
   'knapsack-bb': KnapsackBB,
+  'brute-force-string-match': BruteForceStringMatch,
+  'brute-force-knapsack': BruteForceKnapsack,
 }
 
 export function getAlgorithmById(id) {

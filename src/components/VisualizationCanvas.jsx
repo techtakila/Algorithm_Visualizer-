@@ -14,10 +14,24 @@ export default function VisualizationCanvas({ algorithm, state, currentStep }) {
     canvas.height = canvas.offsetHeight * window.devicePixelRatio
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
 
-    // Clear canvas with light background for better visibility
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    ctx.fillStyle = isDark ? '#1f2937' : '#ffffff'
+    const isDark = document.documentElement.classList.contains('dark')
+    ctx.fillStyle = isDark ? '#0f172a' : '#ffffff'
     ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
+
+    ctx.strokeStyle = isDark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.22)'
+    ctx.lineWidth = 1
+    for (let x = 0; x < canvas.offsetWidth; x += 32) {
+      ctx.beginPath()
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, canvas.offsetHeight)
+      ctx.stroke()
+    }
+    for (let y = 0; y < canvas.offsetHeight; y += 32) {
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(canvas.offsetWidth, y)
+      ctx.stroke()
+    }
 
     // Call algorithm's render function
     if (algorithm.render) {
@@ -26,11 +40,11 @@ export default function VisualizationCanvas({ algorithm, state, currentStep }) {
   }, [algorithm, state, currentStep])
 
   return (
-    <div className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md">
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ring-1 ring-white/70 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800">
       <canvas
         ref={canvasRef}
         className="w-full block"
-        style={{ minHeight: '400px' }}
+        style={{ minHeight: '430px' }}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { Play, Pause, RotateCcw, StepForward, Zap } from 'lucide-react'
+import { Gauge, Pause, Play, RotateCcw, Rows3, StepForward } from 'lucide-react'
 
 export default function AlgorithmControls({
   isRunning,
@@ -11,110 +11,124 @@ export default function AlgorithmControls({
   speed,
   onSpeedChange,
   arraySize,
-  onArraySizeChange
+  onArraySizeChange,
 }) {
+  const progress = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0
+
   return (
     <div className="control-panel space-y-6">
-      {/* Action Buttons */}
-      <div className="flex gap-3 flex-wrap">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={onStart}
-          disabled={isRunning}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
+          disabled={isRunning || currentStep >= totalSteps}
+          className="btn-primary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          <Play className="w-4 h-4" /> Start
+          <Play className="h-4 w-4" /> Start
         </button>
         <button
           onClick={onPause}
           disabled={!isRunning}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
+          className="btn-secondary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          <Pause className="w-4 h-4" /> Pause
+          <Pause className="h-4 w-4" /> Pause
         </button>
         <button
           onClick={onReset}
-          className="btn-secondary flex items-center gap-2 shadow-md hover:shadow-lg"
+          className="btn-secondary flex items-center gap-2"
         >
-          <RotateCcw className="w-4 h-4" /> Reset
+          <RotateCcw className="h-4 w-4" /> Reset
         </button>
         <button
           onClick={onStep}
           disabled={isRunning || currentStep >= totalSteps}
-          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
+          className="btn-secondary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          <StepForward className="w-4 h-4" /> Step
+          <StepForward className="h-4 w-4" /> Step
         </button>
       </div>
 
-      {/* Sliders */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-yellow-500" />
-              Speed
-            </label>
-            <span className="text-lg font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded">
-              {speed}ms
-            </span>
-          </div>
-          <input
-            type="range"
-            min="1"
-            max="1000"
-            value={speed}
-            onChange={(e) => onSpeedChange(Number(e.target.value))}
-            className="w-full cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none slider"
-          />
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <span>Fast</span>
-            <span>Slow</span>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <ControlSlider
+          icon={<Gauge className="h-4 w-4 text-amber-600" />}
+          label="Playback Speed"
+          value={speed}
+          suffix="ms"
+          min={1}
+          max={1000}
+          onChange={onSpeedChange}
+          leftLabel="Fast"
+          rightLabel="Slow"
+        />
 
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              📊 Array Size
-            </label>
-            <span className="text-lg font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded">
-              {arraySize}
-            </span>
-          </div>
-          <input
-            type="range"
-            min="5"
-            max="100"
-            value={arraySize}
-            onChange={(e) => onArraySizeChange(Number(e.target.value))}
-            disabled={isRunning}
-            className="w-full cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none slider disabled:opacity-50"
-          />
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <span>Small</span>
-            <span>Large</span>
-          </div>
-        </div>
+        <ControlSlider
+          icon={<Rows3 className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />}
+          label="Input Size"
+          value={arraySize}
+          min={5}
+          max={100}
+          onChange={onArraySizeChange}
+          disabled={isRunning}
+          leftLabel="Small"
+          rightLabel="Large"
+        />
       </div>
 
-      {/* Progress Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Progress</span>
-          <span className="text-sm font-mono text-gray-900 dark:text-white">
-            <span className="font-bold text-blue-600 dark:text-blue-400">{currentStep}</span> / 
-            <span className="text-gray-500 dark:text-gray-400 ml-1">{totalSteps}</span>
+      <div className="rounded-lg border border-cyan-100 bg-cyan-50/80 p-4 dark:border-cyan-900/50 dark:bg-cyan-950/30">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Progress</span>
+          <span className="font-mono text-sm text-slate-700 dark:text-slate-200">
+            <span className="font-bold text-cyan-700 dark:text-cyan-300">{currentStep}</span>
+            <span className="text-slate-400"> / {totalSteps}</span>
           </span>
         </div>
 
-        {totalSteps > 0 && (
-          <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-inner">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-200 rounded-full shadow-lg"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
-          </div>
-        )}
+        <div className="h-3 overflow-hidden rounded-full bg-white shadow-inner dark:bg-slate-900">
+          <div
+            className="h-full rounded-full bg-cyan-600 transition-all duration-200 dark:bg-cyan-400"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
     </div>
-  }
+  )
+}
+
+function ControlSlider({
+  icon,
+  label,
+  value,
+  suffix = '',
+  min,
+  max,
+  onChange,
+  disabled = false,
+  leftLabel,
+  rightLabel,
+}) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {icon}
+          {label}
+        </label>
+        <span className="rounded-md bg-slate-100 px-3 py-1 text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+          {value}{suffix}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        disabled={disabled}
+        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-cyan-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-800"
+      />
+      <div className="mt-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span>{leftLabel}</span>
+        <span>{rightLabel}</span>
+      </div>
+    </div>
+  )
+}

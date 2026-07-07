@@ -1,73 +1,82 @@
+import { BookOpen, CheckCircle2, Code2, Gauge } from 'lucide-react'
+
 export default function AlgorithmInfo({ algorithm }) {
   if (!algorithm) return null
 
   return (
-    <div className="space-y-4 h-full">
-      <div className="control-panel sticky top-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <span>ℹ️</span> Information
+    <div className="h-full space-y-4">
+      <div className="control-panel sticky top-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+          <BookOpen className="h-5 w-5 text-cyan-700 dark:text-cyan-300" />
+          Information
         </h3>
 
         {algorithm.description && (
-          <div className="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <span>📝</span> Description
+          <section className="mb-5 border-b border-slate-200 pb-5 dark:border-slate-800">
+            <h4 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Description
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
               {algorithm.description}
             </p>
-          </div>
+          </section>
         )}
 
         {algorithm.complexity && (
-          <div className="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-              <span>⚡</span> Time & Space Complexity
+          <section className="mb-5 border-b border-slate-200 pb-5 dark:border-slate-800">
+            <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <Gauge className="h-4 w-4 text-amber-600" />
+              Complexity
             </h4>
-            <div className="space-y-2 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Time:</span>
-                <code className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 px-3 py-1 rounded-md font-mono font-bold">
-                  {algorithm.complexity.time}
-                </code>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Space:</span>
-                <code className="text-xs bg-green-100 dark:bg-green-900/50 text-green-900 dark:text-green-200 px-3 py-1 rounded-md font-mono font-bold">
-                  {algorithm.complexity.space}
-                </code>
-              </div>
+            <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+              <Metric label="Time" value={algorithm.complexity.time} tone="blue" />
+              <Metric label="Space" value={algorithm.complexity.space} tone="green" />
             </div>
-          </div>
+          </section>
         )}
 
         {algorithm.pseudocode && (
-          <div className="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <span>💻</span> Pseudocode
+          <section className="mb-5 border-b border-slate-200 pb-5 dark:border-slate-800">
+            <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <Code2 className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />
+              Pseudocode
             </h4>
-            <pre className="code-block text-xs overflow-x-auto whitespace-pre-wrap break-words">
+            <pre className="code-block text-xs">
               {algorithm.pseudocode}
             </pre>
-          </div>
+          </section>
         )}
 
         {algorithm.useCases && (
-          <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-              <span>🎯</span> Use Cases
+          <section>
+            <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Use Cases
             </h4>
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-              {algorithm.useCases.map((useCase, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">▸</span>
+            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              {algorithm.useCases.map((useCase) => (
+                <li key={useCase} className="flex items-start gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-600" />
                   <span>{useCase}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
       </div>
+    </div>
+  )
+}
+
+function Metric({ label, value, tone }) {
+  const classes = tone === 'green'
+    ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200'
+    : 'bg-cyan-100 text-cyan-900 dark:bg-cyan-950 dark:text-cyan-200'
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</span>
+      <code className={`rounded-md px-3 py-1 text-xs font-bold ${classes}`}>{value}</code>
     </div>
   )
 }

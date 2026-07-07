@@ -1,10 +1,11 @@
-// 0/1 Knapsack DP Implementation
+import { cloneMatrix, drawGrid, drawTitle } from '../visualHelpers'
+
 export const KnapsackDP = {
   name: '0/1 Knapsack - Dynamic Programming',
-  description: 'The 0/1 Knapsack problem is solved using Dynamic Programming. Given weights and values of items, and a capacity, find the maximum value that can be obtained by selecting a subset of items without exceeding the capacity.',
+  description: 'Dynamic programming solves 0/1 Knapsack by building a table where each row adds one item and each column represents a capacity. Every cell reuses previous answers instead of recomputing subsets.',
   complexity: {
     time: 'O(n*W)',
-    space: 'O(n*W)'
+    space: 'O(n*W)',
   },
   pseudocode: `procedure knapsack(weights, values, capacity)
     n := length(weights)
@@ -25,19 +26,54 @@ end procedure`,
     'Resource allocation problems',
     'Cargo loading optimization',
     'Portfolio optimization',
-    'Cutting stock problems'
+    'Budgeted selection problems',
   ],
-  initialize: (size) => {
-    return {
-      items: [],
-      capacity: 50,
-      steps: [],
-      currentArray: []
-    }
+  initialize: () => {
+    const items = [
+      { name: 'A', weight: 1, value: 6 },
+      { name: 'B', weight: 2, value: 10 },
+      { name: 'C', weight: 3, value: 12 },
+      { name: 'D', weight: 5, value: 18 },
+    ]
+    const capacity = 8
+    const { table, steps } = buildKnapsackTable(items, capacity)
+    return { items, capacity, table, steps, currentArray: [] }
   },
   render: (ctx, state, currentStep, width, height) => {
-    ctx.fillStyle = '#000'
-    ctx.font = '16px Arial'
-    ctx.fillText('0/1 Knapsack Problem', 10, 30)
+    if (!state) return
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    const table = step?.table || state.table
+    drawTitle(ctx, 'DP Table: Items vs Capacity', step?.note || `Best value: ${state.table[state.items.length][state.capacity]}`)
+    drawGrid(ctx, table.length, table[0].length, width, height, {
+      values: table,
+      activeCell: step ? [step.itemIndex, step.capacityIndex] : null,
+      labelRows: ['0', ...state.items.map((item) => item.name)],
+      labelCols: Array.from({ length: state.capacity + 1 }, (_, i) => String(i)),
+      maxCell: 46,
+    })
+  },
+}
+
+function buildKnapsackTable(items, capacity) {
+  const table = Array.from({ length: items.length + 1 }, () => Array(capacity + 1).fill(0))
+  const steps = []
+
+  for (let i = 1; i <= items.length; i += 1) {
+    const item = items[i - 1]
+    for (let w = 1; w <= capacity; w += 1) {
+      if (item.weight <= w) {
+        table[i][w] = Math.max(table[i - 1][w], item.value + table[i - 1][w - item.weight])
+      } else {
+        table[i][w] = table[i - 1][w]
+      }
+      steps.push({
+        itemIndex: i,
+        capacityIndex: w,
+        table: cloneMatrix(table),
+        note: `${item.name}: capacity ${w}, best value ${table[i][w]}`,
+      })
+    }
   }
+
+  return { table, steps }
 }
