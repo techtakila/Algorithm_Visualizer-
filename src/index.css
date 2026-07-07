@@ -3,16 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #3b82f6;
-  --secondary-color: #10b981;
-  --danger-color: #ef4444;
-  --warning-color: #f59e0b;
-  --light-bg: #ffffff;
-  --light-text: #111827;
-  --light-border: #e5e7eb;
-  --dark-bg: #111827;
-  --dark-text: #f3f4f6;
-  --dark-border: #374151;
+  --primary: #3b82f6;
+  --secondary: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
 }
 
 * {
@@ -25,6 +19,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  color: #111827;
+}
+
+body.dark {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f3f4f6;
 }
 
 code {
@@ -34,37 +35,222 @@ code {
 
 /* Light mode (default) */
 html {
-  @apply bg-white text-gray-900;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  color: #111827;
 }
 
 /* Dark mode */
 html.dark {
-  @apply bg-gray-900 text-gray-100;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f3f4f6;
 }
 
 .visualization-canvas {
-  @apply rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
   min-height: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+html.dark .visualization-canvas {
+  border-color: #374151;
+  background: #1f2937;
 }
 
 .control-panel {
-  @apply bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+html.dark .control-panel {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .algorithm-card {
-  @apply bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-700 cursor-pointer;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.algorithm-card:hover {
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+html.dark .algorithm-card {
+  background: #1f2937;
+  border-color: #374151;
 }
 
 .btn-primary {
-  @apply bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg transition-colors;
+  background: #f3f4f6;
+  color: #111827;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+html.dark .btn-secondary {
+  background: #374151;
+  color: #f3f4f6;
+  border-color: #4b5563;
+}
+
+html.dark .btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .code-block {
-  @apply bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-x-auto border border-gray-200 dark:border-gray-700;
+  background: #f3f4f6;
+  color: #111827;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
   font-family: 'Courier New', monospace;
   font-size: 0.875rem;
+}
+
+html.dark .code-block {
+  background: #111827;
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+/* Slider Styling */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  outline: none;
+  border-radius: 5px;
+  background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value), #e5e7eb var(--value), #e5e7eb 100%);
+}
+
+html.dark input[type='range'] {
+  background: #374151;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  border: 2px solid #ffffff;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  border: 2px solid #ffffff;
+}
+
+html.dark input[type='range']::-webkit-slider-thumb {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+html.dark input[type='range']::-moz-range-thumb {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease;
 }
