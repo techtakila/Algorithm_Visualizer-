@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getAlgorithmById } from '../algorithms/algorithmRegistry'
 import AlgorithmControls from './AlgorithmControls'
 import VisualizationCanvas from './VisualizationCanvas'
@@ -11,29 +11,41 @@ export default function VisualizationArea({ selectedAlgorithm }) {
   const [speed, setSpeed] = useState(500)
   const [arraySize, setArraySize] = useState(20)
   const [visualizationState, setVisualizationState] = useState(null)
-  const totalSteps = visualizationState?.steps?.length || 0
+  const [totalSteps, setTotalSteps] = useState(0)
 
+  // Initialize algorithm when selected
   useEffect(() => {
     const algo = getAlgorithmById(selectedAlgorithm)
+    if (!algo) return
+    
     setAlgorithm(algo)
     setCurrentStep(0)
     setIsRunning(false)
-    setVisualizationState(algo?.initialize ? algo.initialize(arraySize) : null)
+    
+    try {
+      const state = algo.initialize(arraySize)
+      setVisualizationState(state)
+      setTotalSteps(algo.steps?.length || 0)
+    } catch (error) {
+      console.error('Error initializing algorithm:', error)
+    }
   }, [selectedAlgorithm, arraySize])
 
+  // Auto-play animation
   useEffect(() => {
-    if (!isRunning || !algorithm) return
-
-    const timer = setTimeout(() => {
-      if (currentStep < totalSteps) {
-        setCurrentStep((prev) => prev + 1)
-      } else {
+    if (!isRunning || !algorithm || currentStep >= totalSteps) {
+      if (currentStep >= totalSteps && isRunning) {
         setIsRunning(false)
       }
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setCurrentStep((prev) => prev + 1)
     }, 1100 - speed)
 
     return () => clearTimeout(timer)
-  }, [isRunning, currentStep, algorithm, speed, totalSteps])
+  }, [isRunning, currentStep, speed, totalSteps, algorithm])
 
   const handleStart = () => {
     if (algorithm && !isRunning && currentStep < totalSteps) {
@@ -48,7 +60,13 @@ export default function VisualizationArea({ selectedAlgorithm }) {
   const handleReset = () => {
     setIsRunning(false)
     setCurrentStep(0)
-    setVisualizationState(algorithm?.initialize ? algorithm.initialize(arraySize) : null)
+    try {
+      const state = algorithm.initialize(arraySize)
+      setVisualizationState(state)
+      setTotalSteps(algorithm.steps?.length || 0)
+    } catch (error) {
+      console.error('Error resetting algorithm:', error)
+    }
   }
 
   const handleStep = () => {
@@ -57,31 +75,44 @@ export default function VisualizationArea({ selectedAlgorithm }) {
     }
   }
 
+  const handleSpeedChange = (newSpeed) => {
+    setSpeed(newSpeed)
+  }
+
+  const handleArraySizeChange = (newSize) => {
+    setArraySize(newSize)
+  }
+
   if (!algorithm) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <p className="text-lg text-slate-600 dark:text-slate-300">Select an algorithm to begin</p>
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-slate-600 dark:text-slate-300">Select an algorithm to begin</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <main className="flex-1 overflow-auto bg-[linear-gradient(135deg,#f8fafc_0%,#eef2ff_48%,#ecfeff_100%)] dark:bg-[linear-gradient(135deg,#020617_0%,#111827_48%,#0f172a_100%)]">
+    <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-7xl p-4 sm:p-6">
-        <div className="mb-5 rounded-lg border border-white/80 bg-white/85 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">
-            Interactive Algorithm Lab
+        {/* Header */}
+        <div className="mb-6 rounded-lg border border-white bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+            Interactive Algorithm Visualizer
           </p>
-          <h2 className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+          <h2 className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
             {algorithm.name}
           </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Step through the strategy, inspect the current decision, and compare time and space costs without leaving the visualization.
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Visualize how the algorithm works step by step
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Main content */}
           <div className="space-y-6 lg:col-span-2">
+            {/* Canvas */}
             <div className="control-panel">
               <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">
                 Visualization
@@ -93,6 +124,7 @@ export default function VisualizationArea({ selectedAlgorithm }) {
               />
             </div>
 
+            {/* Controls */}
             <AlgorithmControls
               isRunning={isRunning}
               onStart={handleStart}
@@ -102,12 +134,13 @@ export default function VisualizationArea({ selectedAlgorithm }) {
               currentStep={currentStep}
               totalSteps={totalSteps}
               speed={speed}
-              onSpeedChange={setSpeed}
+              onSpeedChange={handleSpeedChange}
               arraySize={arraySize}
-              onArraySizeChange={setArraySize}
+              onArraySizeChange={handleArraySizeChange}
             />
           </div>
 
+          {/* Info panel */}
           <div>
             <AlgorithmInfo algorithm={algorithm} />
           </div>

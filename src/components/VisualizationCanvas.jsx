@@ -1,50 +1,44 @@
-import { useEffect, useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 export default function VisualizationCanvas({ algorithm, state, currentStep }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    if (!canvasRef.current || !state) return
+    if (!canvasRef.current || !state || !algorithm) return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    
-    // Set canvas size
-    canvas.width = canvas.offsetWidth * window.devicePixelRatio
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio
+    if (!ctx) return
+
+    // Set canvas dimensions
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * window.devicePixelRatio
+    canvas.height = rect.height * window.devicePixelRatio
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
 
-    const isDark = document.documentElement.classList.contains('dark')
-    ctx.fillStyle = isDark ? '#0f172a' : '#ffffff'
-    ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
+    // Clear canvas
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, rect.width, rect.height)
 
-    ctx.strokeStyle = isDark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.22)'
-    ctx.lineWidth = 1
-    for (let x = 0; x < canvas.offsetWidth; x += 32) {
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, canvas.offsetHeight)
-      ctx.stroke()
-    }
-    for (let y = 0; y < canvas.offsetHeight; y += 32) {
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(canvas.offsetWidth, y)
-      ctx.stroke()
-    }
-
-    // Call algorithm's render function
-    if (algorithm.render) {
-      algorithm.render(ctx, state, currentStep, canvas.offsetWidth, canvas.offsetHeight)
+    // Render algorithm
+    try {
+      if (algorithm.render && typeof algorithm.render === 'function') {
+        algorithm.render(ctx, state, currentStep, rect.width, rect.height)
+      }
+    } catch (error) {
+      console.error('Error rendering algorithm:', error)
+      ctx.fillStyle = '#000'
+      ctx.font = '14px Arial'
+      ctx.fillText('Error rendering visualization', 10, 30)
     }
   }, [algorithm, state, currentStep])
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ring-1 ring-white/70 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800">
+    <div className="rounded-lg overflow-hidden border-2 border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
       <canvas
         ref={canvasRef}
         className="w-full block"
-        style={{ minHeight: '430px' }}
+        style={{ minHeight: '400px' }}
       />
     </div>
   )
