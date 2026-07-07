@@ -10,7 +10,7 @@ import { KnapsackDP } from './dynamicProgramming/knapsack'
 import { LCS } from './dynamicProgramming/lcs'
 import { ActivitySelection } from './greedy/activitySelection'
 import { HuffmanCoding } from './greedy/huffmanCoding'
-import { MergeAlgo } from './divideConquer/merge'
+import { MergeSortDC } from './divideConquer/mergeSort'
 import { BinarySearchDC } from './divideConquer/binarySearch'
 import { NQueens } from './backtracking/nqueens'
 import { Sudoku } from './backtracking/sudoku'
@@ -23,9 +23,9 @@ export const ALGORITHM_CATEGORIES = {
     name: '📊 Sorting Algorithms',
     algorithms: [
       { id: 'bubble-sort', name: 'Bubble Sort' },
+      { id: 'insertion-sort', name: 'Insertion Sort' },
       { id: 'merge-sort', name: 'Merge Sort' },
       { id: 'quick-sort', name: 'Quick Sort' },
-      { id: 'insertion-sort', name: 'Insertion Sort' },
     ]
   },
   'searching': {
@@ -68,7 +68,7 @@ export const ALGORITHM_CATEGORIES = {
   'branch-bound': {
     name: '🌳 Branch & Bound',
     algorithms: [
-      { id: 'tsp-bb', name: 'TSP (Traveling Salesman)' },
+      { id: 'tsp-bb', name: 'Traveling Salesman Problem' },
       { id: 'knapsack-bb', name: '0/1 Knapsack (B&B)' },
     ]
   },
@@ -93,7 +93,7 @@ const algorithmMap = {
   'lcs': LCS,
   'activity-selection': ActivitySelection,
   'huffman-coding': HuffmanCoding,
-  'merge-sort-dc': MergeAlgo,
+  'merge-sort-dc': MergeSortDC,
   'binary-search-dc': BinarySearchDC,
   'nqueens': NQueens,
   'sudoku': Sudoku,
