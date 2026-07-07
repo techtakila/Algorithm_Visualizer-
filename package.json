@@ -1,7 +1,7 @@
 {
   "name": "algorithm-visualizer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "d3": "^7.9.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-force-graph": "^1.48.2"
+    "lucide-react": "^0.263.1",
+    "zustand": "^4.4.0",
+    "immer": "^10.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
