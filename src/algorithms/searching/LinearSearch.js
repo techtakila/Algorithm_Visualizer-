@@ -1,17 +1,13 @@
-import { BaseAlgorithm, AlgorithmUtils } from '../core/algorithmEngine'
+import { drawArrayBars, drawTitle } from '../visualHelpers'
 
-export class LinearSearch extends BaseAlgorithm {
-  constructor() {
-    super({
-      id: 'linear-search',
-      name: 'Linear Search',
-      category: 'searching',
-      description: 'Linear Search sequentially checks each element until a match is found.',
-      complexity: {
-        time: 'O(n)',
-        space: 'O(1)'
-      },
-      pseudocode: `procedure linearSearch(A, target)
+export const LinearSearch = {
+  name: 'Linear Search',
+  description: 'Linear Search checks each value one by one until it finds the target or reaches the end of the list. It works without sorted data.',
+  complexity: {
+    time: 'O(n)',
+    space: 'O(1)',
+  },
+  pseudocode: `procedure linearSearch(A, target)
     for i := 0 to length(A) - 1 do
         if A[i] == target then
             return i
@@ -19,66 +15,37 @@ export class LinearSearch extends BaseAlgorithm {
     end for
     return -1
 end procedure`,
-      useCases: ['Unsorted lists', 'Small datasets']
+  useCases: [
+    'Unsorted lists',
+    'Small datasets',
+    'Linked lists',
+    'Simple membership checks',
+  ],
+  initialize: (size) => {
+    const n = Math.min(size, 70)
+    const array = Array.from({ length: n }, () => Math.floor(Math.random() * 92) + 8)
+    const targetIndex = Math.floor(n * 0.72)
+    const target = array[targetIndex]
+    return { array: array.slice(), target, steps: buildSteps(array, target), currentArray: array.slice() }
+  },
+  render: (ctx, state, currentStep, width, height) => {
+    if (!state) return
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Sequential Scan', step?.found ? `Found ${state.target} at index ${step.index}` : `Search target: ${state.target}`)
+    drawArrayBars(ctx, state.currentArray, width, height, {
+      active: step ? [step.index] : [],
+      success: step?.found ? [step.index] : [],
+      muted: step ? state.currentArray.map((_, i) => i).filter((i) => i < step.index) : [],
+      top: 92,
     })
+  },
+}
+
+function buildSteps(array, target) {
+  const steps = []
+  for (let i = 0; i < array.length; i += 1) {
+    steps.push({ index: i, found: array[i] === target })
+    if (array[i] === target) break
   }
-
-  initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size, 100)
-    const target = array[Math.floor(Math.random() * size)]
-    this.reset()
-    this.generateSteps(array, target)
-    return {
-      array: array.slice(),
-      target,
-      steps: this.steps.length,
-      comparisons: this.comparisons
-    }
-  }
-
-  generateSteps(array, target) {
-    for (let i = 0; i < array.length; i++) {
-      AlgorithmUtils.recordOperation(this)
-      AlgorithmUtils.addStep(this, {
-        type: 'check',
-        indices: [i],
-        found: array[i] === target,
-        array: array.slice(),
-        comparisons: this.comparisons
-      })
-      if (array[i] === target) break
-    }
-  }
-
-  render(ctx, state, currentStep, width, height) {
-    if (!state || !state.array) return
-
-    const step = this.steps[currentStep]
-    const array = state.array
-    const barWidth = width / array.length
-    const maxValue = 100
-    const chartHeight = height - 40
-
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, width, height)
-
-    array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * (chartHeight - 20)
-      const x = index * barWidth + 1
-      const y = height - barHeight - 20
-
-      let color = '#3b82f6'
-      if (step && step.indices && step.indices.includes(index)) {
-        color = step.found ? '#10b981' : '#f59e0b'
-      }
-
-      ctx.fillStyle = color
-      ctx.fillRect(x, y, barWidth - 2, barHeight)
-    })
-
-    ctx.fillStyle = '#333'
-    ctx.font = '12px Arial'
-    ctx.textAlign = 'left'
-    ctx.fillText(`Target: ${state.target.toFixed(0)} | Operations: ${step?.comparisons || 0}`, 10, 20)
-  }
+  return steps
 }

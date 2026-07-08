@@ -1,117 +1,68 @@
-import { BaseAlgorithm, AlgorithmUtils } from '../core/algorithmEngine'
+import { drawArrayBars, drawTitle } from '../visualHelpers'
 
-export class QuickSort extends BaseAlgorithm {
-  constructor() {
-    super({
-      id: 'quick-sort',
-      name: 'Quick Sort',
-      category: 'sorting',
-      description: 'Quick Sort is a divide-and-conquer algorithm that selects a pivot and partitions the array around it.',
-      complexity: {
-        time: 'O(n log n)',
-        space: 'O(log n)',
-        best: 'O(n log n)',
-        worst: 'O(n²)',
-        average: 'O(n log n)'
-      },
-      pseudocode: `procedure quickSort(A, low, high)
+export const QuickSort = {
+  name: 'Quick Sort',
+  description: 'Quick Sort chooses a pivot, partitions values around it, and recursively sorts the smaller ranges. It is usually fast in practice and works in place.',
+  complexity: {
+    time: 'O(n log n) average, O(n^2) worst',
+    space: 'O(log n)',
+  },
+  pseudocode: `procedure quickSort(A, low, high)
     if low < high then
         p := partition(A, low, high)
         quickSort(A, low, p - 1)
         quickSort(A, p + 1, high)
     end if
 end procedure`,
-      useCases: ['General sorting', 'In-place sorting', 'Average O(n log n)']
+  useCases: [
+    'General-purpose sorting',
+    'In-place sorting',
+    'Average-case performance',
+    'Cache-friendly array sorting',
+  ],
+  initialize: (size) => {
+    const n = Math.min(size, 64)
+    const array = Array.from({ length: n }, () => Math.floor(Math.random() * 92) + 8)
+    const working = array.slice()
+    const steps = []
+    quickSort(working, 0, working.length - 1, steps)
+    return { array, steps, currentArray: array.slice() }
+  },
+  render: (ctx, state, currentStep, width, height) => {
+    if (!state) return
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Pivot Partitioning', step?.note || 'Choose a pivot and partition the range.')
+    drawArrayBars(ctx, step?.array || state.currentArray, width, height, {
+      active: step ? [step.i, step.j, step.pivot].filter((value) => value !== undefined) : [],
+      success: step?.pivotFinal !== undefined ? [step.pivotFinal] : [],
+      top: 92,
     })
-  }
+  },
+}
 
-  initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size, 100)
-    this.reset()
-    this.generateSteps(array)
-    return {
-      array: array.slice(),
-      steps: this.steps.length,
-      comparisons: this.comparisons,
-      swaps: this.swaps
+function quickSort(arr, low, high, steps) {
+  if (low >= high) return
+  const pivotIndex = partition(arr, low, high, steps)
+  steps.push({ array: arr.slice(), pivotFinal: pivotIndex, note: `Pivot fixed at index ${pivotIndex}` })
+  quickSort(arr, low, pivotIndex - 1, steps)
+  quickSort(arr, pivotIndex + 1, high, steps)
+}
+
+function partition(arr, low, high, steps) {
+  const pivot = arr[high]
+  let i = low - 1
+  steps.push({ array: arr.slice(), pivot: high, note: `Partition range ${low}-${high}` })
+
+  for (let j = low; j < high; j += 1) {
+    steps.push({ array: arr.slice(), i, j, pivot: high, note: `Compare ${arr[j]} with pivot ${pivot}` })
+    if (arr[j] <= pivot) {
+      i += 1
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+      steps.push({ array: arr.slice(), i, j, pivot: high, note: `Swap into the left partition` })
     }
   }
 
-  generateSteps(array) {
-    const arr = array.slice()
-    this.quickSort(arr, 0, arr.length - 1)
-  }
-
-  quickSort(arr, low, high) {
-    if (low < high) {
-      const pi = this.partition(arr, low, high)
-      this.quickSort(arr, low, pi - 1)
-      this.quickSort(arr, pi + 1, high)
-    }
-  }
-
-  partition(arr, low, high) {
-    const pivot = arr[high]
-    let i = low - 1
-
-    for (let j = low; j < high; j++) {
-      AlgorithmUtils.recordComparison(this)
-      if (arr[j] < pivot) {
-        i++
-        [arr[i], arr[j]] = [arr[j], arr[i]]
-        AlgorithmUtils.recordSwap(this)
-        AlgorithmUtils.addStep(this, {
-          type: 'swap',
-          indices: [i, j],
-          array: arr.slice(),
-          comparisons: this.comparisons,
-          swaps: this.swaps
-        })
-      }
-    }
-
-    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]]
-    AlgorithmUtils.recordSwap(this)
-    AlgorithmUtils.addStep(this, {
-      type: 'partition',
-      indices: [i + 1],
-      array: arr.slice(),
-      comparisons: this.comparisons,
-      swaps: this.swaps
-    })
-
-    return i + 1
-  }
-
-  render(ctx, state, currentStep, width, height) {
-    if (!state || !state.array) return
-
-    const step = this.steps[currentStep]
-    const array = step ? step.array : state.array
-    const barWidth = width / array.length
-    const maxValue = 100
-    const chartHeight = height - 40
-
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, width, height)
-
-    array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * (chartHeight - 20)
-      const x = index * barWidth + 1
-      const y = height - barHeight - 20
-
-      let color = '#8b5cf6'
-      if (step && step.indices && step.indices.includes(index)) {
-        color = step.type === 'partition' ? '#10b981' : '#ef4444'
-      }
-
-      ctx.fillStyle = color
-      ctx.fillRect(x, y, barWidth - 2, barHeight)
-    })
-
-    ctx.fillStyle = '#333'
-    ctx.font = '12px Arial'
-    ctx.textAlign = 'left'
-    ctx.fillText(`Comparisons: ${step?.comparisons || 0} | Swaps: ${step?.swaps || 0}`, 10, 20)
-  }
+  ;[arr[i + 1], arr[high]] = [arr[high], arr[i + 1]]
+  steps.push({ array: arr.slice(), i: i + 1, pivot: high, note: 'Move pivot into final position' })
+  return i + 1
 }

@@ -1,137 +1,76 @@
-import { BaseAlgorithm, AlgorithmUtils, RenderUtils } from '../core/algorithmEngine'
+import { drawArrayBars, drawTitle } from '../visualHelpers'
 
-export class MergeSort extends BaseAlgorithm {
-  constructor() {
-    super({
-      id: 'merge-sort',
-      name: 'Merge Sort',
-      category: 'sorting',
-      description: 'Merge Sort is a divide-and-conquer algorithm that divides the array into halves, recursively sorts them, and then merges them back.',
-      complexity: {
-        time: 'O(n log n)',
-        space: 'O(n)',
-        best: 'O(n log n)',
-        worst: 'O(n log n)',
-        average: 'O(n log n)'
-      },
-      pseudocode: `procedure mergeSort(A, left, right)
-    if left < right then
-        mid := (left + right) / 2
-        mergeSort(A, left, mid)
-        mergeSort(A, mid + 1, right)
-        merge(A, left, mid, right)
+export const MergeSort = {
+  name: 'Merge Sort',
+  description: 'Merge Sort splits the array into halves, recursively sorts each half, and merges the sorted halves. It is stable and guarantees O(n log n) time.',
+  complexity: {
+    time: 'O(n log n)',
+    space: 'O(n)',
+  },
+  pseudocode: `procedure mergeSort(A)
+    if length(A) > 1 then
+        split A into left and right
+        mergeSort(left)
+        mergeSort(right)
+        merge left and right back into A
     end if
 end procedure`,
-      useCases: [
-        'Large datasets',
-        'Guaranteed O(n log n)',
-        'External sorting'
-      ],
-      visualizationType: 'array'
+  useCases: [
+    'Large datasets',
+    'Stable sorting',
+    'External sorting',
+    'Linked list sorting',
+  ],
+  initialize: (size) => {
+    const n = Math.min(size, 64)
+    const array = Array.from({ length: n }, () => Math.floor(Math.random() * 92) + 8)
+    const working = array.slice()
+    const steps = []
+    mergeSort(working, 0, working.length - 1, steps)
+    return { array: array.slice(), steps, currentArray: array.slice() }
+  },
+  render: (ctx, state, currentStep, width, height) => {
+    if (!state) return
+    const step = state.steps[Math.min(currentStep, state.steps.length - 1)]
+    drawTitle(ctx, 'Stable Merge Process', step?.note || 'Merge sorted ranges.')
+    drawArrayBars(ctx, step?.array || state.currentArray, width, height, {
+      active: step ? range(step.left, step.right) : [],
+      success: step?.type === 'merge' ? range(step.left, step.right) : [],
+      top: 92,
     })
+  },
+}
+
+function mergeSort(arr, left, right, steps) {
+  if (left >= right) return
+  const mid = Math.floor((left + right) / 2)
+  mergeSort(arr, left, mid, steps)
+  mergeSort(arr, mid + 1, right, steps)
+  merge(arr, left, mid, right, steps)
+}
+
+function merge(arr, left, mid, right, steps) {
+  const leftArr = arr.slice(left, mid + 1)
+  const rightArr = arr.slice(mid + 1, right + 1)
+  let i = 0
+  let j = 0
+  let k = left
+
+  while (i < leftArr.length && j < rightArr.length) {
+    arr[k] = leftArr[i] <= rightArr[j] ? leftArr[i++] : rightArr[j++]
+    steps.push({ type: 'merge', left, right, array: arr.slice(), note: `Merge positions ${left}-${right}` })
+    k += 1
   }
-
-  initialize(size) {
-    const array = AlgorithmUtils.generateRandomArray(size, 100)
-    this.reset()
-    this.generateSteps(array)
-    return {
-      array: array.slice(),
-      steps: this.steps.length,
-      comparisons: this.comparisons,
-      swaps: this.swaps
-    }
+  while (i < leftArr.length) {
+    arr[k++] = leftArr[i++]
+    steps.push({ type: 'merge', left, right, array: arr.slice(), note: `Copy remaining left values` })
   }
-
-  generateSteps(array) {
-    const arr = array.slice()
-    this.mergeSort(arr, 0, arr.length - 1)
+  while (j < rightArr.length) {
+    arr[k++] = rightArr[j++]
+    steps.push({ type: 'merge', left, right, array: arr.slice(), note: `Copy remaining right values` })
   }
+}
 
-  mergeSort(arr, left, right) {
-    if (left < right) {
-      const mid = Math.floor((left + right) / 2)
-      this.mergeSort(arr, left, mid)
-      this.mergeSort(arr, mid + 1, right)
-      this.merge(arr, left, mid, right)
-    }
-  }
-
-  merge(arr, left, mid, right) {
-    const leftArr = arr.slice(left, mid + 1)
-    const rightArr = arr.slice(mid + 1, right + 1)
-    let i = 0, j = 0, k = left
-
-    while (i < leftArr.length && j < rightArr.length) {
-      AlgorithmUtils.recordComparison(this)
-      if (leftArr[i] <= rightArr[j]) {
-        arr[k++] = leftArr[i++]
-      } else {
-        arr[k++] = rightArr[j++]
-      }
-      AlgorithmUtils.recordSwap(this)
-      AlgorithmUtils.addStep(this, {
-        type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
-        array: arr.slice(),
-        comparisons: this.comparisons,
-        swaps: this.swaps
-      })
-    }
-
-    while (i < leftArr.length) {
-      arr[k++] = leftArr[i++]
-      AlgorithmUtils.addStep(this, {
-        type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
-        array: arr.slice(),
-        comparisons: this.comparisons,
-        swaps: this.swaps
-      })
-    }
-
-    while (j < rightArr.length) {
-      arr[k++] = rightArr[j++]
-      AlgorithmUtils.addStep(this, {
-        type: 'merge',
-        indices: Array.from({ length: right - left + 1 }, (_, idx) => left + idx),
-        array: arr.slice(),
-        comparisons: this.comparisons,
-        swaps: this.swaps
-      })
-    }
-  }
-
-  render(ctx, state, currentStep, width, height) {
-    if (!state || !state.array) return
-
-    const step = this.steps[currentStep]
-    const array = step ? step.array : state.array
-    const barWidth = width / array.length
-    const maxValue = 100
-    const padding = 40
-    const chartHeight = height - padding
-
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, width, height)
-
-    array.forEach((value, index) => {
-      const barHeight = (value / maxValue) * (chartHeight - 20)
-      const x = index * barWidth + 1
-      const y = height - barHeight - 20
-
-      let color = '#10b981'
-      if (step && step.indices && step.indices.includes(index)) {
-        color = '#f59e0b'
-      }
-
-      ctx.fillStyle = color
-      ctx.fillRect(x, y, barWidth - 2, barHeight)
-    })
-
-    ctx.fillStyle = '#333'
-    ctx.font = '12px Arial'
-    ctx.textAlign = 'left'
-    ctx.fillText(`Comparisons: ${step?.comparisons || 0} | Swaps: ${step?.swaps || 0}`, 10, 20)
-  }
+function range(left, right) {
+  return Array.from({ length: right - left + 1 }, (_, index) => left + index)
 }
