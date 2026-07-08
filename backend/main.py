@@ -49,3 +49,36 @@ def home():
         "Algorithm Visualizer Backend Running"
 
     }
+    
+@app.get("../src/algorithms")
+@app.get("/algorithms")
+ 
+def algorithms():
+
+    return [
+        {
+            "id":"bubble-sort",
+            "name":"Bubble Sort",
+            "category":"Sorting"
+        },
+        {
+            "id":"merge-sort",
+            "name":"Merge Sort",
+            "category":"Sorting"
+        },
+        {
+            "id":"quick-sort",
+            "name":"Quick Sort",
+            "category":"Sorting"
+        },
+        {
+            "id":"binary-search",
+            "name":"Binary Search",
+            "category":"Searching"
+        },
+        {
+            "id":"nqueens",
+            "name":"N Queens",
+            "category":"Backtracking"
+        }
+    ]
