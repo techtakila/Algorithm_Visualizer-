@@ -1,11 +1,24 @@
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-python-dotenv
-python-multipart
-passlib[bcrypt]
-bcrypt
-python-jose[cryptography]
-email-validator
-aiofiles
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+
+# Database
+SQLAlchemy==2.0.43
+
+# Authentication & Security
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]==3.5.0
+python-multipart==0.0.20
+
+# Validation
+pydantic==2.11.7
+pydantic-settings==2.10.1
+
+# Environment variables
+python-dotenv==1.1.1
+
+# CORS / HTTP
+starlette==0.47.2
+
+# Optional future AI/API features
+requests==2.32.5
