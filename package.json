@@ -10,18 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "immer": "^10.0.0",
+    "lucide-react": "^1.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "lucide-react": "^0.263.1",
-    "zustand": "^4.4.0",
-    "immer": "^10.0.0"
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "@tailwindcss/postcss": "^4.2.1",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
