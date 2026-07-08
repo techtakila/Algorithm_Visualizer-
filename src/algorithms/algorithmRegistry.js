@@ -6,12 +6,12 @@ import { BinarySearch } from './searching/BinarySearch'
 import { NQueens } from './backtracking/NQueens'
 
 const algorithmInstances = {
-  'bubble-sort': new BubbleSort(),
-  'merge-sort': new MergeSort(),
-  'quick-sort': new QuickSort(),
-  'linear-search': new LinearSearch(),
-  'binary-search': new BinarySearch(),
-  'nqueens': new NQueens()
+  'bubble-sort': BubbleSort,
+  'merge-sort': MergeSort,
+  'quick-sort': QuickSort,
+  'linear-search': LinearSearch,
+  'binary-search': BinarySearch,
+  'nqueens': NQueens
 }
 
 export const ALGORITHM_CATEGORIES = {
